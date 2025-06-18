@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Jenkins credentials ID
-        DOCKER_IMAGE = 'sushmajanaki12/hello-service'
+        DOCKER_IMAGE = 'sushmajanaki/hello-app:latest'
     }
 
     stages {
@@ -21,15 +20,22 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: "$DOCKERHUB_CREDENTIALS", url: '']) {
-                    sh 'docker push $DOCKER_IMAGE'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                        echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+                        docker push $DOCKER_IMAGE
+                    '''
                 }
             }
         }
 
         stage('Deploy Locally') {
             steps {
-                sh 'docker run -d -p 5000:5000 $DOCKER_IMAGE'
+                sh '''
+                    docker stop hello-app || true
+                    docker rm hello-app || true
+                    docker run -d -p 8080:80 --name hello-app $DOCKER_IMAGE
+                '''
             }
         }
     }
