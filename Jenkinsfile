@@ -5,12 +5,12 @@ pipeline {
     IMAGE_NAME = 'yourdockerhub/hello-service'
   }
 
-  stages {
-    stage('Clone') {
-      steps {
-        git 'https://github.com/yourusername/hello-service.git'
-      }
+  stage('Clone') {
+    steps {
+        git 'https://github.com/SushmaJanaki12/jenkins1.git'
     }
+  }
+
 
     stage('Build Docker Image') {
       steps {
